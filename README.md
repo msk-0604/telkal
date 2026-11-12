@@ -133,47 +133,47 @@ cd web && node scripts/make-icons.mjs
 - `public/icon-192.png`
 - `public/icon-512.png`
 
-## デプロイ手順（実施前に必ず確認してください）
+## デプロイ手順（管理画面で行う方法）
 
-本番環境へのデプロイや課金プランの変更は、まだ行っていません。
+コマンド操作なしで、Cloudflare と Vercel の管理画面から GitHub リポジトリを連携して公開します。
+本番ブランチは `claude/adoring-darwin-gmn7ir` です。
 
-### 1. Cloudflare（Workers + D1）
+### 1. Cloudflare D1（データベース）
 
-```bash
-cd worker && npx wrangler login
-```
+1. Cloudflare ダッシュボード → Storage & databases → D1 SQL database → Create Database
+2. 名前は `telkal` にします。Location は Asia-Pacific を選びます。
+3. 表示された Database ID を `worker/wrangler.jsonc` の `database_id` に設定します。
 
-```bash
-npx wrangler d1 create telkal
-```
+### 2. Cloudflare Workers（API）
 
-表示された `database_id` を `wrangler.jsonc` に設定してから、次を実行します。
+1. Workers & Pages → Create → Import a repository → GitHub の `msk-0604/telkal` を選びます。
+2. 次のように設定します。
+   - Project name：`telkal-api`
+   - Root directory：`worker`
+   - Deploy command：`npx wrangler d1 migrations apply telkal --remote && npx wrangler deploy`
+   - Production branch：`claude/adoring-darwin-gmn7ir`
+3. デプロイ後、Worker の Settings → Variables and Secrets に、Secret として `INTERNAL_API_SECRET` を追加します（32文字以上のランダムな英数字）。
+4. Worker の URL（`https://telkal-api.<サブドメイン>.workers.dev`）を控えておきます。
 
-```bash
-npm run db:migrate:remote
-```
+### 3. Vercel（画面）
 
-```bash
-npx wrangler secret put INTERNAL_API_SECRET
-```
+1. Add New → Project で `msk-0604/telkal` をインポートし、Root Directory を `web` にします。
+2. Settings → Environment Variables に、次の2つを Production で追加します。
+   - `WORKER_API_URL`：手順2の Worker の URL
+   - `INTERNAL_API_SECRET`：手順2と同じ値
+3. 環境変数を追加したら、Deployments から再デプロイ（Redeploy）します。
 
-```bash
-npx wrangler deploy
-```
+サーバー処理は `web/vercel.json` で東京リージョン（hnd1）に固定しています。
 
-デプロイ後の URL（例：`https://telkal-api.<account>.workers.dev`）を控えておきます。
+### 4. 最初のユーザー
 
-### 2. 企業とユーザーの作成（本番）
+パスワードのハッシュを含む SQL を作り、D1 のコンソール（Console タブ）で実行します。
+
+コマンドで作る場合は、次を実行します（`worker` ディレクトリで、Cloudflare にログイン済みであること）。
 
 ```bash
 TELKAL_PASSWORD='10文字以上のパスワード' npm run user:create -- --org "株式会社〇〇" --name "山田 太郎" --email you@example.com --remote
 ```
-
-### 3. Vercel（Next.js）
-
-1. Vercel でこのリポジトリをインポートし、Root Directory を `web` にします。
-2. Environment Variables に `WORKER_API_URL`（手順1の URL）と `INTERNAL_API_SECRET`（手順1と同じ値）を設定します。
-3. デプロイします。
 
 ## API 一覧（Workers）
 
