@@ -9,6 +9,7 @@ import { SESSION_COOKIE, callWorker, isSameOrigin, logApi } from "@/lib/server/w
 const UUID = "[0-9a-fA-F-]{36}";
 const ALLOWED: Array<{ methods: string[]; pattern: RegExp }> = [
   { methods: ["GET"], pattern: /^auth\/me$/ },
+  { methods: ["POST"], pattern: /^auth\/password$/ },
   { methods: ["GET", "POST"], pattern: /^customers$/ },
   { methods: ["GET", "PATCH"], pattern: new RegExp(`^customers/${UUID}$`) },
   { methods: ["GET", "POST"], pattern: new RegExp(`^customers/${UUID}/records$`) },

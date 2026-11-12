@@ -1,6 +1,6 @@
-import { dummyPasswordWork, randomToken, sha256Hex, verifyPassword } from "./crypto";
+import { dummyPasswordWork, hashPassword, randomToken, sha256Hex, verifyPassword } from "./crypto";
 import { HttpError, fieldErrors, json, nowIso, readJson } from "./http";
-import { loginSchema } from "./schemas";
+import { loginSchema, passwordChangeSchema } from "./schemas";
 
 export type AuthContext = {
   sessionId: string;
@@ -134,6 +134,33 @@ export async function authenticate(request: Request, env: Env): Promise<AuthCont
 
 export async function handleLogout(auth: AuthContext, env: Env): Promise<Response> {
   await env.DB.prepare(`DELETE FROM sessions WHERE id = ?1`).bind(auth.sessionId).run();
+  return json({ ok: true });
+}
+
+/** パスワード変更。現在のパスワードを確認し、ほかの端末のセッションはすべて無効にする */
+export async function handleChangePassword(request: Request, env: Env, auth: AuthContext): Promise<Response> {
+  const parsed = passwordChangeSchema.safeParse(await readJson(request));
+  if (!parsed.success) {
+    throw new HttpError(400, "validation_error", "入力内容を確認してください", fieldErrors(parsed.error));
+  }
+  const key = `pwchange:${auth.userId}`;
+  if ((await bumpAttempt(env.DB, key)) > MAX_ATTEMPTS_PER_EMAIL) {
+    throw new HttpError(429, "too_many_attempts", "試行回数が多すぎます。15分ほど待ってから再度お試しください");
+  }
+  const row = await env.DB.prepare(`SELECT password_hash FROM users WHERE id = ?1`)
+    .bind(auth.userId)
+    .first<{ password_hash: string }>();
+  if (!row || !(await verifyPassword(parsed.data.currentPassword, row.password_hash))) {
+    throw new HttpError(400, "validation_error", "現在のパスワードが正しくありません", {
+      currentPassword: "現在のパスワードが正しくありません",
+    });
+  }
+  const hash = await hashPassword(parsed.data.newPassword);
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE users SET password_hash = ?1, updated_at = ?2 WHERE id = ?3`).bind(hash, nowIso(), auth.userId),
+    env.DB.prepare(`DELETE FROM sessions WHERE user_id = ?1 AND id != ?2`).bind(auth.userId, auth.sessionId),
+    env.DB.prepare(`DELETE FROM login_attempts WHERE key = ?1`).bind(key),
+  ]);
   return json({ ok: true });
 }
 

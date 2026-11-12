@@ -24,6 +24,19 @@ export const loginSchema = z.object({
   password: z.string().min(1, { error: "パスワードを入力してください" }).max(200),
 });
 
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, { error: "現在のパスワードを入力してください" }).max(200),
+    newPassword: z
+      .string()
+      .min(8, { error: "新しいパスワードは8文字以上にしてください" })
+      .max(200, { error: "新しいパスワードは200文字以内にしてください" }),
+  })
+  .refine((v) => v.currentPassword !== v.newPassword, {
+    error: "現在と異なるパスワードを入力してください",
+    path: ["newPassword"],
+  });
+
 export const phoneSearchSchema = z.object({ phone: phoneInput });
 
 export const customerCreateSchema = z.object({

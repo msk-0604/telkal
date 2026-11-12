@@ -20,8 +20,8 @@ if (!values.name || !values.email || (!values.org && !values["org-id"]) || !pass
   console.error('使い方: TELKAL_PASSWORD=... npm run user:create -- --org "会社名" --name "氏名" --email メール [--remote]');
   process.exit(1);
 }
-if (password.length < 10) {
-  console.error("パスワードは10文字以上にしてください");
+if (password.length < 8) {
+  console.error("パスワードは8文字以上にしてください");
   process.exit(1);
 }
 const now = new Date().toISOString();

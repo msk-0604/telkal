@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, LogOut, Timer } from "lucide-react";
+import { Building2, KeyRound, LogOut, Timer } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -26,6 +26,14 @@ export function UserMenu({ me }: { me: CurrentUser }) {
         <Building2 className="size-4 shrink-0 text-slate-400" aria-hidden />
         <span className="truncate">{me.organization.name}</span>
       </span>
+      <Link
+        href="/settings/password"
+        className="inline-flex h-10 items-center gap-1 rounded-lg px-2.5 text-sm text-slate-600 hover:bg-slate-100"
+        aria-label="パスワード変更"
+        title="パスワード変更"
+      >
+        <KeyRound className="size-4" aria-hidden />
+      </Link>
       <button
         type="button"
         onClick={logout}

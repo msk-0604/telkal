@@ -6,7 +6,7 @@
  *  - x-telkal-session:          ログイン時に発行したセッショントークン
  * 企業ID は常にセッションから確定し、リクエスト本文・クエリの値は使わない。
  */
-import { authenticate, handleLogin, handleLogout, handleMe, type AuthContext } from "./auth";
+import { authenticate, handleChangePassword, handleLogin, handleLogout, handleMe, type AuthContext } from "./auth";
 import { timingSafeEqualString } from "./crypto";
 import { createCustomer, getCustomer, searchCustomers, updateCustomer } from "./customers";
 import { HttpError, errorResponse, json } from "./http";
@@ -21,6 +21,7 @@ const UUID = "([0-9a-fA-F-]{36})";
 
 const routes: Route[] = [
   { method: "GET", pattern: /^\/v1\/auth\/me$/, name: "me", handler: ({ auth }) => handleMe(auth) },
+  { method: "POST", pattern: /^\/v1\/auth\/password$/, name: "password", handler: ({ request, env, auth }) => handleChangePassword(request, env, auth) },
   { method: "POST", pattern: /^\/v1\/auth\/logout$/, name: "logout", handler: ({ auth, env }) => handleLogout(auth, env) },
   { method: "GET", pattern: /^\/v1\/customers$/, name: "customers.search", handler: ({ url, env, auth }) => searchCustomers(url, env, auth) },
   { method: "POST", pattern: /^\/v1\/customers$/, name: "customers.create", handler: ({ request, env, auth }) => createCustomer(request, env, auth) },
