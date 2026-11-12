@@ -3,14 +3,15 @@
 import { useRef, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { recordFormSchema, zodFieldErrors } from "@/lib/schemas";
-import { STATUS_LABELS, STATUS_OPTIONS, type ConstructionRecord, type RecordStatus } from "@/lib/types";
-import { Alert, Button, Field, Select, TextArea, TextInput } from "./ui";
+import type { ConstructionRecord, RecordStatus } from "@/lib/types";
+import { Alert, Button, Field, TextArea, TextInput } from "./ui";
 
 type Values = {
   title: string;
   constructionDate: string;
   description: string;
   address: string;
+  /** 画面には表示しないが、既存の値を保ったまま送る */
   status: RecordStatus;
   notes: string;
 };
@@ -126,20 +127,6 @@ export function RecordForm({
             onChange={(e) => set("constructionDate", e.target.value)}
             error={errors.constructionDate}
           />
-        </Field>
-        <Field label="工事状態" htmlFor={`${idp}-status`} error={errors.status}>
-          <Select
-            id={`${idp}-status`}
-            value={values.status}
-            onChange={(e) => set("status", e.target.value as RecordStatus)}
-            error={errors.status}
-          >
-            {STATUS_OPTIONS.map((s) => (
-              <option key={s} value={s}>
-                {STATUS_LABELS[s]}
-              </option>
-            ))}
-          </Select>
         </Field>
       </div>
       <Field label="工事住所" htmlFor={`${idp}-address`} error={errors.address} hint={mode === "create" ? "顧客の住所を初期値にしています" : undefined}>

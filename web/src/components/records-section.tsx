@@ -4,7 +4,7 @@ import { ChevronRight, ClipboardList, ExternalLink, MapPin, Pencil, Plus, Rotate
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { formatDateTime, formatYmd, googleMapsUrl } from "@/lib/format";
-import { STATUS_LABELS, type ConstructionRecord, type Customer, type RecordStatus } from "@/lib/types";
+import type { ConstructionRecord, Customer } from "@/lib/types";
 import { RecordForm } from "./record-form";
 import { Alert, Button, Card, Modal, Spinner } from "./ui";
 
@@ -16,15 +16,6 @@ function sortRecords(list: ConstructionRecord[]): ConstructionRecord[] {
     if (a.constructionDate !== b.constructionDate) return (b.constructionDate ?? "").localeCompare(a.constructionDate ?? "");
     return b.createdAt.localeCompare(a.createdAt);
   });
-}
-
-export function StatusBadge({ status }: { status: RecordStatus }) {
-  const style = {
-    planned: "bg-amber-50 text-amber-700 ring-amber-200",
-    in_progress: "bg-blue-50 text-blue-700 ring-blue-200",
-    completed: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  }[status];
-  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${style}`}>{STATUS_LABELS[status]}</span>;
 }
 
 export function RecordsSection({ customer }: { customer: Customer }) {
@@ -100,7 +91,6 @@ export function RecordsSection({ customer }: { customer: Customer }) {
                 <tr className="border-b border-slate-200 text-xs font-medium text-slate-500">
                   <th className="px-5 py-2.5 font-medium">工事名</th>
                   <th className="w-36 px-3 py-2.5 font-medium">工事日</th>
-                  <th className="w-28 px-3 py-2.5 font-medium">状態</th>
                   <th className="w-10" aria-hidden />
                 </tr>
               </thead>
@@ -117,9 +107,6 @@ export function RecordsSection({ customer }: { customer: Customer }) {
                       </button>
                     </td>
                     <td className="px-3 py-3.5 text-sm tabular-nums text-slate-700">{formatYmd(r.constructionDate)}</td>
-                    <td className="px-3 py-3.5">
-                      <StatusBadge status={r.status} />
-                    </td>
                     <td className="pr-4 text-slate-400">
                       <ChevronRight className="size-4" aria-hidden />
                     </td>
@@ -134,10 +121,7 @@ export function RecordsSection({ customer }: { customer: Customer }) {
                   <button type="button" onClick={() => setSelectedId(r.id)} className="flex w-full items-center gap-3 px-5 py-3.5 text-left active:bg-slate-50">
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-slate-800">{r.title}</p>
-                      <p className="mt-1 flex items-center gap-2 text-sm tabular-nums text-slate-500">
-                        {formatYmd(r.constructionDate)}
-                        <StatusBadge status={r.status} />
-                      </p>
+                      <p className="mt-1 text-sm tabular-nums text-slate-500">{formatYmd(r.constructionDate)}</p>
                     </div>
                     <ChevronRight className="size-4 shrink-0 text-slate-400" aria-hidden />
                   </button>
@@ -274,12 +258,6 @@ function RecordDialog({
             <div>
               <dt className="text-xs font-medium text-slate-500">工事日</dt>
               <dd className="mt-1 tabular-nums text-slate-800">{formatYmd(record.constructionDate)}</dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium text-slate-500">工事状態</dt>
-              <dd className="mt-1">
-                <StatusBadge status={record.status} />
-              </dd>
             </div>
             <div className="col-span-2">
               <dt className="text-xs font-medium text-slate-500">工事住所</dt>
