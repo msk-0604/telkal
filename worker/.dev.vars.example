@@ -1,0 +1,3 @@
+# ローカル開発用。`cp .dev.vars.example .dev.vars` して値を変更してください。
+# web/.env.local の INTERNAL_API_SECRET と同じ値にします。
+INTERNAL_API_SECRET=change-me-to-a-long-random-string

@@ -1,0 +1,25 @@
+{
+  "name": "telkal-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "db:migrate:local": "wrangler d1 migrations apply telkal --local",
+    "db:migrate:remote": "wrangler d1 migrations apply telkal --remote",
+    "db:seed:local": "node scripts/seed.mjs",
+    "user:create": "node scripts/create-user.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run test/phone.test.ts",
+    "cf-typegen": "wrangler types",
+    "test:api": "vitest run test/isolation.test.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.160.1"
+  }
+}

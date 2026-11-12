@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "telkal-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "telkal",
+      // 本番用: `wrangler d1 create telkal` で発行された ID に差し替えてください
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    // ブラウザから直接呼ぶ想定はないため既定では空（CORS を許可しない）。
+    // 必要な場合のみカンマ区切りで本番オリジンを指定してください。
+    "ALLOWED_ORIGINS": "",
+    "SESSION_TTL_DAYS": "30"
+  }
+  // 秘密情報 INTERNAL_API_SECRET は `wrangler secret put INTERNAL_API_SECRET`（本番）
+  // または .dev.vars（ローカル）で設定します。
+}
