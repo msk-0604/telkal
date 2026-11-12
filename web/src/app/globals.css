@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "BIZ UDPGothic", Meiryo, system-ui, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "palt" 0;
+}
+
+/* iOS で日付入力の高さが揃わない問題の対策 */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 2.75rem;
+}
