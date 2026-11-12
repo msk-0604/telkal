@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run test/phone.test.ts",
     "cf-typegen": "wrangler types",
-    "test:api": "vitest run test/isolation.test.ts"
+    "test:api": "vitest run test/isolation.test.ts",
+    "deploy": "wrangler d1 migrations apply telkal --remote && wrangler deploy"
   },
   "dependencies": {
     "zod": "^4.6.7"

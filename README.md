@@ -142,7 +142,7 @@ cd web && node scripts/make-icons.mjs
 
 1. Cloudflare ダッシュボード → Storage & databases → D1 SQL database → Create Database
 2. 名前は `telkal` にします。Location は Asia-Pacific を選びます。
-3. 表示された Database ID を `worker/wrangler.jsonc` の `database_id` に設定します。
+3. 表示された Database ID を `worker/wrangler.jsonc` の `database_id` に設定します（設定済み）。
 
 ### 2. Cloudflare Workers（API）
 
@@ -150,7 +150,7 @@ cd web && node scripts/make-icons.mjs
 2. 次のように設定します。
    - Project name：`telkal-api`
    - Root directory：`worker`
-   - Deploy command：`npx wrangler d1 migrations apply telkal --remote && npx wrangler deploy`
+   - Deploy command：`npm run deploy`（マイグレーションを適用してから Worker を公開）
    - Production branch：`claude/adoring-darwin-gmn7ir`
 3. デプロイ後、Worker の Settings → Variables and Secrets に、Secret として `INTERNAL_API_SECRET` を追加します（32文字以上のランダムな英数字）。
 4. Worker の URL（`https://telkal-api.<サブドメイン>.workers.dev`）を控えておきます。

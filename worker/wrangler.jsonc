@@ -9,8 +9,7 @@
     {
       "binding": "DB",
       "database_name": "telkal",
-      // 本番用: `wrangler d1 create telkal` で発行された ID に差し替えてください
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "b83e604e-7243-413c-a97b-0e8699aa57c1",
       "migrations_dir": "migrations"
     }
   ],
