@@ -20,7 +20,15 @@ const phoneInput = z
   });
 
 export const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email({ error: "メールアドレスの形式が正しくありません" }).max(254),
+  /** 省略時は、登録ユーザーが1人だけの場合にそのユーザーでログインする（パスワードのみのログイン） */
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email({ error: "メールアドレスの形式が正しくありません" })
+    .max(254)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   password: z.string().min(1, { error: "パスワードを入力してください" }).max(200),
 });
 

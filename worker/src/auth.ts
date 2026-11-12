@@ -39,7 +39,8 @@ export async function handleLogin(request: Request, env: Env): Promise<Response>
   }
   const { email, password } = parsed.data;
   const ip = request.headers.get("x-telkal-client-ip") || "unknown";
-  const emailKey = `email:${await sha256Hex(email)}`;
+  // パスワードのみのログインは、アカウント1つ分として回数を数える
+  const emailKey = email ? `email:${await sha256Hex(email)}` : "account:single";
 
   const [ipCount, emailCount] = await Promise.all([
     bumpAttempt(env.DB, `ip:${ip}`),
@@ -49,27 +50,39 @@ export async function handleLogin(request: Request, env: Env): Promise<Response>
     throw new HttpError(429, "too_many_attempts", "ログイン試行回数が多すぎます。15分ほど待ってから再度お試しください");
   }
 
-  const user = await env.DB.prepare(
-    `SELECT u.id, u.name, u.email, u.password_hash, u.organization_id, o.name AS organization_name
-       FROM users u JOIN organizations o ON o.id = u.organization_id
-      WHERE u.email = ?1`,
-  )
-    .bind(email)
-    .first<{
-      id: string;
-      name: string;
-      email: string;
-      password_hash: string;
-      organization_id: string;
-      organization_name: string;
-    }>();
+  type UserRow = {
+    id: string;
+    name: string;
+    email: string;
+    password_hash: string;
+    organization_id: string;
+    organization_name: string;
+  };
+  const USER_SELECT = `SELECT u.id, u.name, u.email, u.password_hash, u.organization_id, o.name AS organization_name
+       FROM users u JOIN organizations o ON o.id = u.organization_id`;
+
+  let user: UserRow | null;
+  if (email) {
+    user = await env.DB.prepare(`${USER_SELECT} WHERE u.email = ?1`).bind(email).first<UserRow>();
+  } else {
+    // パスワードのみ：ユーザーが1人だけの運用でのみ許可する
+    const { results } = await env.DB.prepare(`${USER_SELECT} ORDER BY u.created_at LIMIT 2`).all<UserRow>();
+    if (results.length > 1) {
+      throw new HttpError(400, "email_required", "メールアドレスを入力してください");
+    }
+    user = results[0] ?? null;
+  }
 
   let ok = false;
   if (user) ok = await verifyPassword(password, user.password_hash);
   else await dummyPasswordWork(password);
 
   if (!user || !ok) {
-    throw new HttpError(401, "invalid_credentials", "メールアドレスまたはパスワードが正しくありません");
+    throw new HttpError(
+      401,
+      "invalid_credentials",
+      email ? "メールアドレスまたはパスワードが正しくありません" : "パスワードが正しくありません",
+    );
   }
 
   const token = randomToken();

@@ -6,7 +6,6 @@ import { useRef, useState } from "react";
 import { Alert, Button, Card, Field, TextInput } from "@/components/ui";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,8 +17,8 @@ export function LoginForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (submitLock.current) return; // 二重送信防止
-    if (!email.trim() || !password) {
-      setError("メールアドレスとパスワードを入力してください");
+    if (!password) {
+      setError("パスワードを入力してください");
       return;
     }
     submitLock.current = true;
@@ -29,7 +28,7 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ password }),
       });
       if (res.ok) {
         router.replace("/");
@@ -50,18 +49,8 @@ export function LoginForm() {
       <form onSubmit={submit} noValidate className="space-y-4">
         {info && !error && <Alert tone="info">{info}</Alert>}
         {error && <Alert>{error}</Alert>}
-        <Field label="メールアドレス" htmlFor="email">
-          <TextInput
-            id="email"
-            type="email"
-            autoComplete="username"
-            inputMode="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            maxLength={254}
-            autoFocus
-          />
-        </Field>
+        {/* ブラウザのパスワード保存機能が働くよう、表示しないユーザー名欄を置く */}
+        <input type="text" name="username" autoComplete="username" value="TELKAL" readOnly hidden />
         <Field label="パスワード" htmlFor="password">
           <TextInput
             id="password"
@@ -70,6 +59,7 @@ export function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             maxLength={200}
+            autoFocus
           />
         </Field>
         <Button type="submit" className="w-full" loading={submitting}>
