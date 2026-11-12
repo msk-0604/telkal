@@ -50,7 +50,7 @@ export function HomeLink() {
         alt=""
         width={32}
         height={32}
-        className="size-8 rounded-lg"
+        className="size-8"
         onError={(e) => (e.currentTarget.style.display = "none")}
       />
       <span className="text-xl font-extrabold tracking-wider text-blue-700">TELKAL</span>
